@@ -1,5 +1,6 @@
 {
   "name": "netlivue",
+  "description": "Vue 3 application with TypeScript and Tailwind CSS for Spotifun frontend.",
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
