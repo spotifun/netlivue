@@ -10,5 +10,6 @@ module.exports = {
     'prettier',
     'prettier/vue',
   ],
+  ignorePatterns: ['**/assets/*'],
   plugins: ['vue'],
-}
+};
