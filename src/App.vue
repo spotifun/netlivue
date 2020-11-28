@@ -1,15 +1,50 @@
 <template>
-  <img class="mx-auto" alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3.0 + Vite" />
+  <div
+    id="app"
+    class="flex flex-col items-center font-sans antialiased"
+    :class="{ dark }">
+    <TheNavbar
+      :is-dark="dark"
+      @dark="dark = !dark"
+    />
+    <div
+      id="content"
+      class="flex w-full min-h-screen items-center
+      text-gray-700 dark:text-gray-300
+      transition-all duration-300 ease-out"
+    >
+      <router-view></router-view>
+    </div>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import TheNavbar from './components/TheNavbar.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld,
+    TheNavbar,
+  },
+  data() {
+    return {
+      dark: false,
+    };
+  },
+  watch: {
+    dark(value) {
+      localStorage.dark = value;
+    },
+  },
+  created() {
+    if (localStorage.dark) {
+      this.dark = localStorage.dark === 'true';
+    } else {
+      this.dark = (
+        window.matchMedia
+        && window.matchMedia('(prefers-color-scheme: dark)').matches
+      );
+    }
   },
 };
 </script>
@@ -19,6 +54,5 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  @apply text-center text-gray-700 mt-4;
 }
 </style>
