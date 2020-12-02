@@ -36,9 +36,10 @@
           dark:focus:text-blue-100 dark:hover:text-blue-100"
           @click.stop="toggleNavbar"
         >
-          <span class="fill-current w-8 h-8">
-            {{ navToggle }}
-          </span>
+          <icon-base class="fill-current w-7 h-7">
+            <icon-close v-if="isOpen" />
+            <icon-menu v-else />
+          </icon-base>
         </button>
       </div>
     </div>
@@ -80,11 +81,6 @@ export default {
       lastScrollPosition: 0,
       isOpen: false,
     };
-  },
-  computed: {
-    navToggle(): string {
-      return this.isOpen ? 'Times' : 'Bars';
-    },
   },
   mounted() {
     window.addEventListener('scroll', this.onScroll);
