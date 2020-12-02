@@ -11,7 +11,8 @@
       id="content"
       class="flex w-full min-h-screen items-center
       text-gray-700 dark:text-gray-300
-      transition-all duration-300 ease-out"
+      transition-all duration-300 ease-out
+      bg-gray-100 dark:bg-gray-900"
     >
       <router-view></router-view>
     </div>
