@@ -24,9 +24,10 @@
           dark:focus:text-blue-100 dark:hover:text-blue-100"
           @click="$emit('dark')"
         >
-          <span class="fill-current w-6 h-6">
-            {{ darkToggle }}
-          </span>
+          <icon-base class="fill-current w-6 h-6">
+            <icon-moon v-if="isDark" />
+            <icon-sun v-else />
+          </icon-base>
         </button>
         <button
           type="button"
@@ -65,7 +66,6 @@
 <script lang="ts">
 export default {
   name: 'TheNavbar',
-  components: {},
   props: {
     navLinks: {
       type: Array,
@@ -84,9 +84,6 @@ export default {
   computed: {
     navToggle(): string {
       return this.isOpen ? 'Times' : 'Bars';
-    },
-    darkToggle(): string {
-      return this.isDark ? 'Moon' : 'Sun';
     },
   },
   mounted() {
