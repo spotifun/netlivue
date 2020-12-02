@@ -4,7 +4,6 @@
     navbar z-10 fixed w-full py-3
     bg-white dark:bg-gray-800 dark:text-blue-200 shadow-md
     transition-all duration-300 ease-out"
-    :class="{ 'navbar-hidden': !showNavbar }"
   >
     <div class="mx-4 flex items-center justify-between flex-grow">
       <router-link
@@ -77,55 +76,18 @@ export default {
   emits: ['dark'],
   data() {
     return {
-      showNavbar: true,
-      lastScrollPosition: 0,
       isOpen: false,
     };
   },
-  mounted() {
-    window.addEventListener('scroll', this.onScroll);
-  },
-  beforeUnmount() {
-    window.removeEventListener('scroll', this.onScroll);
-  },
   methods: {
-    onScroll() {
-      const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-      if (currentScrollPosition < 0) {
-        return;
-      }
-      if (Math.abs(currentScrollPosition - this.lastScrollPosition) < 60) {
-        return;
-      }
-      this.showNavbar = currentScrollPosition < this.lastScrollPosition;
-      this.lastScrollPosition = currentScrollPosition;
-    },
     toggleNavbar() {
       this.isOpen = !this.isOpen;
-      if (this.isOpen) {
-        this.$nextTick(() => {
-          document.addEventListener('click', this.closeNavbar);
-        });
-      }
-    },
-    closeNavbar() {
-      this.isOpen = false;
-      document.removeEventListener('click', this.closeNavbar);
     },
   },
 };
 </script>
 
 <style scoped>
-.navbar {
-  transform: translate3d(0, 0, 0);
-}
-
-.navbar.navbar-hidden {
-  @apply shadow-none;
-  transform: translate3d(0, -100%, 0);
-}
-
 .navbar a {
   @apply font-bold text-blue-900 dark:text-blue-200;
 }
