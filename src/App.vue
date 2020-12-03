@@ -5,6 +5,7 @@
     :class="{ dark }">
     <TheNavbar
       :is-dark="dark"
+      :nav-links="navLinks"
       @dark="dark = !dark"
     />
     <div
@@ -21,6 +22,7 @@
 
 <script>
 import TheNavbar from './components/TheNavbar.vue';
+import router from './router';
 
 export default {
   name: 'App',
@@ -30,6 +32,7 @@ export default {
   data() {
     return {
       dark: false,
+      navLinks: router.getRoutes(),
     };
   },
   watch: {
