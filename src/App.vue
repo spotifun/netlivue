@@ -33,7 +33,9 @@ export default {
   data() {
     return {
       dark: false,
-      navLinks: router.getRoutes(),
+      navLinks: router
+        .getRoutes()
+        .filter((route) => route.meta.showOnNavbar !== false),
     };
   },
   watch: {
