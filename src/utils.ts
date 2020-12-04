@@ -11,3 +11,7 @@ export async function b64urlsafe(hash: string) {
   const hashb64 = btoa(hash);
   return hashb64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
+
+export function getHost() {
+  return window.location.origin;
+}
