@@ -2,7 +2,8 @@
   <div
     id="app"
     class="flex flex-col items-center font-sans antialiased"
-    :class="{ dark }">
+    :class="{ dark }"
+  >
     <TheNavbar
       :is-dark="dark"
       :nav-links="navLinks"
@@ -44,10 +45,9 @@ export default {
     if (localStorage.dark) {
       this.dark = localStorage.dark === 'true';
     } else {
-      this.dark = (
-        window.matchMedia
-        && window.matchMedia('(prefers-color-scheme: dark)').matches
-      );
+      this.dark =
+        window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
   },
 };

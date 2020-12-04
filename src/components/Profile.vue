@@ -30,10 +30,10 @@ export default {
       if (!val) {
         return;
       }
-      this.getUserInfo().then(user => {
+      this.getUserInfo().then((user) => {
         this.user = user;
       });
-    }
+    },
   },
   created() {
     this.authenticate(this.getParams(new URL(window.location.href)));

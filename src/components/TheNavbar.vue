@@ -1,10 +1,8 @@
 <template>
-  <header
-    class="sm:flex sm:justify-between sm:items-center
+  <header class="sm:flex sm:justify-between sm:items-center
     navbar z-10 fixed w-full py-3
     bg-white dark:bg-gray-800 dark:text-blue-200 shadow-md
-    transition-all duration-300 ease-out"
-  >
+    transition-all duration-300 ease-out">
     <div class="mx-4 flex items-center justify-between flex-grow">
       <router-link
         to="/"
@@ -12,10 +10,8 @@
         class="focus:outline-none"
       >
       </router-link>
-      <div
-        class="flex items-center justify-between
-        text-blue-700 dark:text-blue-200"
-      >
+      <div class="flex items-center justify-between
+        text-blue-700 dark:text-blue-200">
         <button
           type="button"
           class="focus:outline-none
