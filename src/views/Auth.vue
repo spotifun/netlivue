@@ -8,7 +8,7 @@
 <script>
 import BaseContainer from '../components/base/BaseContainer.vue';
 
-import { authenticate, getParams } from '../api/spotify/accounts';
+import { authenticate, getParams } from '../services/spotify/accounts';
 
 export default {
   name: 'Auth',

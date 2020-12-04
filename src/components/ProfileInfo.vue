@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { getUserInfo } from '../api/spotify/api';
+import { getUserInfo } from '../services/spotify/api';
 import { PrivateUser } from '../models/spotify/api';
 
 export default {

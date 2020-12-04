@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { genAuthURI } from '../api/spotify/accounts';
+import { genAuthURI } from '../services/spotify/accounts';
 
 export default {
   name: 'LoginButton',
