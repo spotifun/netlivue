@@ -1,5 +1,4 @@
 <template>
-  <h1>{{ msg }}</h1>
   <p>{{ success ? 'Welcome' : 'Error' }}</p>
   <p v-if="code">{{ code }}</p>
   <div v-if="user">
@@ -16,9 +15,6 @@ import { PrivateUser } from '../models/spotify/api';
 
 export default {
   name: 'Profile',
-  props: {
-    msg: { type: String, default: 'hello' },
-  },
   data() {
     return {
       success: null,
