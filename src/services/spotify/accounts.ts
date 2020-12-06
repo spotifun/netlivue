@@ -56,6 +56,17 @@ export const getAccessToken = async (code: string, codeVerifier: string) => {
   return response.data;
 };
 
+export const refreshAccessToken = async (refreshToken: string) => {
+  const body = {
+    grant_type:'refresh_token',
+    refresh_token:refreshToken,
+    client_id:env.SPOTIFY_CLIENT_ID
+  };
+
+  const response = await accounts.post('token', body);
+  return response.data;
+}
+
 export const getParams = (url: URL): RedirectQueryParams => {
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
