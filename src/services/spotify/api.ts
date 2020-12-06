@@ -22,7 +22,7 @@ api.interceptors.response.use(
   response => (response),
   async error => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && error.response.message == "The access token expired" && !originalRequest._retry) {
+    if (error.response.status === 401 && error.response.data.error.message == "The access token expired" && !originalRequest._retry) {
       originalRequest._retry = true;
       const auth = loadAccessToken();
       const newAccessToken = await refreshAccessToken(auth.refresh_token);
