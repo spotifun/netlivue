@@ -7,20 +7,20 @@
 </template>
 
 <script lang="ts">
+import { ref } from 'vue';
 import { getUserInfo } from '../services/spotify/api';
 import { PrivateUser } from '../models/spotify/api';
 
 export default {
   name: 'ProfileInfo',
-  data() {
+  setup() {
+    const user = ref<PrivateUser>(null);
+
+    getUserInfo().then((userValue) => (user.value = userValue));
+
     return {
-      user: null as PrivateUser,
+      user,
     };
-  },
-  created() {
-    getUserInfo().then((user) => {
-      this.user = user;
-    });
   },
 };
 </script>
