@@ -6,6 +6,9 @@
 </template>
 
 <script>
+import { ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+
 import BaseContainer from '../components/base/BaseContainer.vue';
 
 import { authenticate, getParams } from '../services/spotify/accounts';
@@ -15,23 +18,31 @@ export default {
   components: {
     BaseContainer,
   },
-  data() {
+  setup() {
+    const router = useRouter();
+    const { success } = useSuccess(router);
+
+    authenticate(getParams(new URL(window.location.href))).then(
+      (successValue) => (success.value = successValue),
+    );
+
     return {
-      success: null,
+      success,
     };
   },
-  watch: {
-    success(val) {
-      if (!val) {
-        return;
-      }
-      this.$router.push({ name: 'Profile' });
-    },
-  },
-  created() {
-    authenticate(getParams(new URL(window.location.href))).then(
-      (success) => (this.success = success),
-    );
-  },
 };
+
+function useSuccess(router) {
+  const success = ref(null);
+  watch(success, (val) => {
+    if (!val) {
+      return;
+    }
+    router.push({ name: 'Profile' });
+  });
+
+  return {
+    success,
+  };
+}
 </script>
