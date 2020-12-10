@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "isolatedModules": true,
-    "module": "ESNext",
-    "moduleResolution": "Node"
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node"
   }
 }
