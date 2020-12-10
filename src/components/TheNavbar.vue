@@ -60,6 +60,8 @@
 </template>
 
 <script lang="ts">
+import { ref } from 'vue';
+
 export default {
   name: 'TheNavbar',
   props: {
@@ -70,15 +72,14 @@ export default {
     isDark: Boolean,
   },
   emits: ['dark'],
-  data() {
+  setup() {
+    const isOpen = ref(false);
+    const toggleNavbar = () => (isOpen.value = !isOpen.value);
+
     return {
-      isOpen: false,
+      isOpen,
+      toggleNavbar,
     };
-  },
-  methods: {
-    toggleNavbar() {
-      this.isOpen = !this.isOpen;
-    },
   },
 };
 </script>
