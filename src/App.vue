@@ -22,35 +22,40 @@
 </template>
 
 <script>
+import { ref, watch } from 'vue';
 import TheNavbar from './components/TheNavbar.vue';
 import router from './router';
+
+function useDark() {
+  const dark = ref(false);
+
+  if (localStorage.dark) {
+    dark.value = localStorage.dark === 'true';
+  } else {
+    dark.value =
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  watch(dark, (val) => (localStorage.dark = val));
+  return dark;
+}
 
 export default {
   name: 'App',
   components: {
     TheNavbar,
   },
-  data() {
+  setup() {
+    const dark = useDark();
+    const navLinks = router
+      .getRoutes()
+      .filter((route) => route.meta.showOnNavbar !== false);
+
     return {
-      dark: false,
-      navLinks: router
-        .getRoutes()
-        .filter((route) => route.meta.showOnNavbar !== false),
+      dark,
+      navLinks,
     };
-  },
-  watch: {
-    dark(value) {
-      localStorage.dark = value;
-    },
-  },
-  created() {
-    if (localStorage.dark) {
-      this.dark = localStorage.dark === 'true';
-    } else {
-      this.dark =
-        window.matchMedia &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
   },
 };
 </script>
