@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { Router, useRouter } from 'vue-router';
 
 import BaseContainer from '../components/base/BaseContainer.vue';
@@ -19,7 +19,7 @@ function useSuccess(router: Router) {
   return success;
 }
 
-export default {
+export default defineComponent({
   name: 'Auth',
   components: {
     BaseContainer,
@@ -36,5 +36,5 @@ export default {
       success,
     };
   },
-};
+});
 </script>

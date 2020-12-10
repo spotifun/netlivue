@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts">
-export default {
-  name: 'BaseContainer',
-};
+import { defineComponent } from 'vue';
+
+export default defineComponent(function BaseContainer() {});
 </script>
 
 <style scoped>

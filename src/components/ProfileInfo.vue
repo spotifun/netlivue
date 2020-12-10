@@ -7,20 +7,17 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { getUserInfo } from '../services/spotify/api';
 import { PrivateUser } from '../models/spotify/api';
 
-export default {
-  name: 'ProfileInfo',
-  setup() {
-    const user = ref<PrivateUser>(null);
+export default defineComponent(function ProfileInfo() {
+  const user = ref<PrivateUser>(null);
 
-    getUserInfo().then((userValue) => (user.value = userValue));
+  getUserInfo().then((userValue) => (user.value = userValue));
 
-    return {
-      user,
-    };
-  },
-};
+  return {
+    user,
+  };
+});
 </script>

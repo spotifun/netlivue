@@ -8,19 +8,16 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { genAuthURI } from '../services/spotify/accounts';
 
-export default {
-  name: 'LoginButton',
-  setup() {
-    const authURI = ref('');
+export default defineComponent(function LoginButton() {
+  const authURI = ref('');
 
-    genAuthURI().then((uriValue) => (authURI.value = uriValue));
+  genAuthURI().then((uriValue) => (authURI.value = uriValue));
 
-    return {
-      authURI,
-    };
-  },
-};
+  return {
+    authURI,
+  };
+});
 </script>

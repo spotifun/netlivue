@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import TheNavbar from './components/TheNavbar.vue';
 import router from './router';
 
@@ -41,7 +41,7 @@ function useDark() {
   return dark;
 }
 
-export default {
+export default defineComponent({
   name: 'App',
   components: {
     TheNavbar,
@@ -57,7 +57,7 @@ export default {
       navLinks,
     };
   },
-};
+});
 </script>
 
 <style>

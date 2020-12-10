@@ -60,9 +60,9 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 
-export default {
+export default defineComponent({
   name: 'TheNavbar',
   props: {
     navLinks: {
@@ -81,7 +81,7 @@ export default {
       toggleNavbar,
     };
   },
-};
+});
 </script>
 
 <style scoped>
