@@ -4,7 +4,7 @@
   </BaseContainer>
 </template>
 
-<script>
+<script lang="ts">
 import BaseContainer from '../components/base/BaseContainer.vue';
 import ProfileInfo from '../components/ProfileInfo.vue';
 

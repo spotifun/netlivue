@@ -21,7 +21,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, watch } from 'vue';
 import TheNavbar from './components/TheNavbar.vue';
 import router from './router';
