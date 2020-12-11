@@ -1,7 +1,6 @@
 <template>
   <BaseContainer>
-    <p>Please wait while we're authenticating...</p>
-    <p v-if="success !== null">{{ success ? 'Success!' : 'Failed.' }}</p>
+    <icon-spinner class="animate-spin w-24 h-24 block mx-auto"></icon-spinner>
   </BaseContainer>
 </template>
 
@@ -13,7 +12,10 @@ import { authenticate, getParams } from '../services/spotify/accounts';
 
 function useSuccess(router: Router) {
   const success = ref<boolean>();
-  watch(success, (val) => val && router.push({ name: 'Profile' }));
+  watch(success, (val) => {
+    const next = { name: (val && 'Profile') || 'Home' };
+    router.replace(next);
+  });
   return success;
 }
 
