@@ -1,8 +1,30 @@
 <template>
   <div v-if="user">
-    <p>Name: {{ user.display_name }}</p>
-    <p>Country: {{ user.country }}</p>
-    <p>URI: {{ user.uri }}</p>
+    <img
+      v-if="user.images"
+      class="rounded-full"
+      :src="user.images[0].url"
+      :alt="user.display_name"
+    >
+    <h2 class="text-5xl font-bold p-2 m-2">
+      <a :href="user.external_urls.spotify">{{ user.display_name }}</a>
+    </h2>
+    <table class="text-center">
+      <thead>
+        <tr>
+          <th>Country</th>
+          <th>URI</th>
+          <th>Followers</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ user.country }}</td>
+          <td>{{ user.uri }}</td>
+          <td>{{ user.followers.total }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -12,7 +34,7 @@ import { getUserInfo } from '../services/spotify/api';
 import { PrivateUser } from '../models/spotify/api';
 
 export default defineComponent(function ProfileInfo() {
-  const user = ref<PrivateUser>(null);
+  const user = ref<PrivateUser>();
 
   getUserInfo().then((userValue) => (user.value = userValue));
 
@@ -21,3 +43,10 @@ export default defineComponent(function ProfileInfo() {
   };
 });
 </script>
+
+<style scoped>
+td,
+th {
+  @apply p-1;
+}
+</style>
