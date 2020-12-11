@@ -14,7 +14,7 @@ export interface ExplicitContentSettings {
   filter_locked: boolean;
 }
 
-export interface User {
+export interface PublicUser {
   country: string;
   display_name?: string;
   external_urls: Record<string, string>;
@@ -26,7 +26,7 @@ export interface User {
   uri: string;
 }
 
-export interface PrivateUser extends User {
+export interface PrivateUser extends PublicUser {
   email: string;
   explicit_content: ExplicitContentSettings;
   product: string;
