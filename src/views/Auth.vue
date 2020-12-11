@@ -9,21 +9,16 @@
 import { defineComponent, ref, watch } from 'vue';
 import { Router, useRouter } from 'vue-router';
 
-import BaseContainer from '../components/base/BaseContainer.vue';
-
 import { authenticate, getParams } from '../services/spotify/accounts';
 
 function useSuccess(router: Router) {
-  const success = ref<boolean>(null);
+  const success = ref<boolean>();
   watch(success, (val) => val && router.push({ name: 'Profile' }));
   return success;
 }
 
 export default defineComponent({
   name: 'Auth',
-  components: {
-    BaseContainer,
-  },
   setup() {
     const router = useRouter();
     const success = useSuccess(router);
