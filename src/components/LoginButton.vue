@@ -1,7 +1,11 @@
 <template>
-  <button class="px-6 py-3 bg-green-600 text-white font-bold rounded-full">
-    <a :href="authURI">Click here to login</a>
-  </button>
+  <div>
+    <a :href="authURI">
+      <button class="px-6 py-3 bg-green-600 text-white font-bold rounded-full">
+        Click here to login
+      </button>
+    </a>
+  </div>
 </template>
 
 <script lang="ts">
