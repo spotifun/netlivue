@@ -1,4 +1,4 @@
-import { getHost } from '../../utils';
+import { getHost } from './utils';
 
 const env = import.meta.env;
 
@@ -10,3 +10,5 @@ export const ACCOUNTS_BASE_URL = ACCOUNTS_HOST + 'api/';
 export const ACCOUNTS_AUTHORIZE_URL = ACCOUNTS_HOST + 'authorize?';
 export const API_HOST = 'https://api.spotify.com/';
 export const API_BASE_URL = API_HOST + 'v1/';
+export const FUNIX_HOST = env.FUNIX_HOST as string;
+export const FUNIX_BASE_URL = FUNIX_HOST + 'api/';

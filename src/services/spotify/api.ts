@@ -3,7 +3,7 @@ import axios from 'axios';
 import { refreshAccessToken } from './accounts';
 import { PrivateUser } from '../../models/spotify/api';
 import { accessToken, setAccessToken } from '../../store/auth';
-import { API_BASE_URL } from './constants';
+import { API_BASE_URL } from '../../constants';
 
 export const getUserInfo = async (): Promise<PrivateUser> => {
   const response = await api.get('me');
