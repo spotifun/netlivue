@@ -1,4 +1,4 @@
-import { createWebHistory, createRouter } from 'vue-router';
+import { createWebHistory, createRouter, RouteRecordRaw } from 'vue-router';
 import Auth from './views/Auth.vue';
 import Home from './views/Home.vue';
 import Profile from './views/Profile.vue';
@@ -7,7 +7,7 @@ const DEFAULT_TITLE = 'spotifun';
 
 const history = createWebHistory();
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   { path: '/', component: Home, name: 'Home' },
   {
     path: '/auth',

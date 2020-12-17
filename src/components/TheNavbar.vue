@@ -60,13 +60,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
+import { RouteRecordRaw } from 'vue-router';
 
 export default defineComponent({
   name: 'TheNavbar',
   props: {
     navLinks: {
-      type: Array,
+      type: Array as PropType<RouteRecordRaw[]>,
       default: () => [{ name: 'Home', path: '/' }],
     },
     isDark: Boolean,
