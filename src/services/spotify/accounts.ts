@@ -11,6 +11,7 @@ import * as env from './constants';
 import { sha256, b64urlsafe } from '../../utils';
 import {
   codeVerifier,
+  deleteAccessToken,
   setAccessToken,
   setCodeVerifier,
   setState,
@@ -99,6 +100,8 @@ export const authenticate = async (params: RedirectQueryParams) => {
   setAccessToken(result);
   return true;
 };
+
+export const logout = () => deleteAccessToken();
 
 export const accounts = axios.create({
   baseURL: env.ACCOUNTS_BASE_URL,
