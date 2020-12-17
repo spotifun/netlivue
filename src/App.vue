@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import TheNavbar from './components/TheNavbar.vue';
 import router from './router';
 
-function useDark() {
+const useDark = () => {
   const dark = ref(false);
 
   if (localStorage.dark) {
@@ -39,7 +39,17 @@ function useDark() {
 
   watch(dark, (val) => (localStorage.dark = val));
   return dark;
-}
+};
+
+const useNavLinks = () => {
+  return computed(() =>
+    router
+      .getRoutes()
+      .filter((route) =>
+        route.meta.showOnNavbar ? route.meta.showOnNavbar() : true,
+      ),
+  );
+};
 
 export default defineComponent({
   name: 'App',
@@ -48,10 +58,7 @@ export default defineComponent({
   },
   setup() {
     const dark = useDark();
-    const navLinks = router
-      .getRoutes()
-      .filter((route) => route.meta.showOnNavbar !== false);
-
+    const navLinks = useNavLinks();
     return {
       dark,
       navLinks,

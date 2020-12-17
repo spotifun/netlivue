@@ -1,4 +1,5 @@
 import { createWebHistory, createRouter, RouteRecordRaw } from 'vue-router';
+import { loggedIn } from './store/auth';
 import Auth from './views/Auth.vue';
 import Home from './views/Home.vue';
 import Profile from './views/Profile.vue';
@@ -13,9 +14,14 @@ const routes: RouteRecordRaw[] = [
     path: '/auth',
     component: Auth,
     name: 'Auth',
-    meta: { showOnNavbar: false },
+    meta: { showOnNavbar: () => false },
   },
-  { path: '/profile', component: Profile, name: 'Profile' },
+  {
+    path: '/profile',
+    component: Profile,
+    name: 'Profile',
+    meta: { showOnNavbar: () => loggedIn.value },
+  },
 ];
 
 const router = createRouter({ history, routes });
