@@ -4,17 +4,16 @@
       v-if="!loggedIn"
       :href="authURI"
     >
-      <button class="px-6 py-3 bg-green-600 text-white font-bold rounded-full">
-        Click here to login
-      </button>
+      <BaseButton>
+        Login
+      </BaseButton>
     </a>
-    <button
+    <BaseButton
       v-else
-      class="px-6 py-3 bg-green-600 text-white font-bold rounded-full"
       @click="logout()"
     >
-      Click here to logout
-    </button>
+      Logout
+    </BaseButton>
   </div>
 </template>
 
