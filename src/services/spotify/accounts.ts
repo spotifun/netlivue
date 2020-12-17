@@ -3,7 +3,10 @@ import type {} from 'vite';
 import axios from 'axios';
 import { nanoid } from 'nanoid';
 
-import { AccessToken, RedirectQueryParams } from '../../models/spotify/auth';
+import {
+  AccessToken,
+  RedirectQueryParams,
+} from '../../models/spotify/accounts';
 import * as env from './constants';
 import { sha256, b64urlsafe } from '../../utils';
 import {

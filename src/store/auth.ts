@@ -1,6 +1,6 @@
 import { readonly, ref } from 'vue';
 import { createStore } from '.';
-import { AccessToken } from '../models/spotify/auth';
+import { AccessToken } from '../models/spotify/accounts';
 
 export const {
   state: accessToken,
