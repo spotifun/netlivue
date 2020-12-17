@@ -11,9 +11,9 @@ export const {
 export const {
   state: codeVerifier,
   setState: setCodeVerifier,
-} = createStore<String>('spotifyCodeVerifier');
+} = createStore<string>('spotifyCodeVerifier');
 
-export const { state: state, setState: setState } = createStore<String>(
+export const { state: state, setState: setState } = createStore<string>(
   'spotifyState',
 );
 

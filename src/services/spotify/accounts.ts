@@ -89,7 +89,7 @@ export const getParams = (url: URL): RedirectQueryParams => {
 
 export const authenticate = async (params: RedirectQueryParams) => {
   const { code, state, error } = params;
-  const savedCodeVerifier = codeVerifier.value;
+  const savedCodeVerifier = codeVerifier.value!;
   const savedState = authState.value;
 
   if (error || state !== savedState || !code) {
