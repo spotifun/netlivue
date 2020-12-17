@@ -3,8 +3,10 @@ import { loggedIn } from './store/auth';
 import Auth from './views/Auth.vue';
 import Home from './views/Home.vue';
 import Profile from './views/Profile.vue';
+import Match from './views/Match.vue';
 
 const DEFAULT_TITLE = 'spotifun';
+const LOGIN_REQUIRED = () => loggedIn.value;
 
 const history = createWebHistory();
 
@@ -20,7 +22,13 @@ const routes: RouteRecordRaw[] = [
     path: '/profile',
     component: Profile,
     name: 'Profile',
-    meta: { showOnNavbar: () => loggedIn.value },
+    meta: { showOnNavbar: LOGIN_REQUIRED },
+  },
+  {
+    path: '/match',
+    component: Match,
+    name: 'Match',
+    meta: { showOnNavbar: LOGIN_REQUIRED },
   },
 ];
 
