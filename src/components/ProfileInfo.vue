@@ -10,12 +10,15 @@
       v-else
       class="text-center"
     >
-      <img
-        v-if="user.images"
-        class="rounded-full mx-auto w-48"
-        :src="user.images[0].url"
-        :alt="user.display_name"
-      >
+      <div class="mx-auto w-48">
+        <img
+          v-if="user.images && user.images[0].url"
+          class="rounded-full"
+          :src="user.images[0].url"
+          :alt="user.display_name"
+        >
+        <icon-profile v-else></icon-profile>
+      </div>
       <h2 class="text-5xl font-bold p-2 m-2">
         <a :href="user.external_urls.spotify">{{ user.display_name }}</a>
       </h2>
