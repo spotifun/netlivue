@@ -1,13 +1,29 @@
 import axios from 'axios';
 
 import { refreshAccessToken } from './accounts';
-import { PrivateUser } from '../../models/spotify/api';
+import {
+  PrivateUser,
+  RecommendationRequest,
+  RecommendationResponse,
+} from '../../models/spotify/api';
 import { accessToken, setAccessToken } from '../../store/auth';
 import { API_BASE_URL } from '../../constants';
 
-export const getUserInfo = async (): Promise<PrivateUser> => {
+export const getUserInfo = async () => {
   const response = await api.get('me');
-  return await response.data;
+  return (await response.data) as PrivateUser;
+};
+
+export const getRecommendations = async (data: RecommendationRequest) => {
+  const seeds = {
+    seed_artists: data.seed_artists.join(','),
+    seed_genres: data.seed_genres.join(','),
+    seed_tracks: data.seed_tracks.join(','),
+  };
+  const response = await api.get('recommendations', {
+    params: { ...data, ...seeds },
+  });
+  return (await response.data) as RecommendationResponse;
 };
 
 export const api = axios.create({
