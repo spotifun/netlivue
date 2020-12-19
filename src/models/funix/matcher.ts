@@ -1,13 +1,13 @@
 export enum MatchStatus {
-  no_match,
-  too_few,
-  ok,
-  too_much,
+  no_match = 'no_match',
+  too_few = 'too_few',
+  ok = 'ok',
+  too_much = 'too_much',
 }
 
 export enum ResponseStatus {
-  ok,
-  error,
+  ok = 'ok',
+  error = 'error',
 }
 
 interface GenericRequest {
@@ -38,7 +38,7 @@ export interface MatchResponse {
 }
 
 export interface StatusRequest {
-  matching_id: string;
+  matching_id: number;
 }
 
 export interface StatusResponse {
@@ -58,6 +58,7 @@ export interface MatchingIDResponse {
 export interface RecommendationSeeds {
   seed_artists: Array<string>;
   seed_tracks: Array<string>;
+  seed_genres?: Array<string>;
 }
 
 export interface RecommendationRequest extends GenericRequest {}
