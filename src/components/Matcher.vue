@@ -3,18 +3,18 @@
     <div class="text-center">
       <div>
         <h2 class="text-3xl heading">
-          <template v-if="!myRoomID && !friendRoomID">
+          <template v-if="!roomID">
             You haven't entered a matching room.
           </template>
-          <template v-else>Your {{ friendRoomID ? "friend's" : '' }} room ID:
+          <template v-else>Your {{ joinSuccess ? "friend's" : '' }} room ID:
             <span class="text-green-400">
-              {{ myRoomID || friendRoomID }}
+              {{ roomID }}
             </span>
           </template>
         </h2>
       </div>
       <div
-        v-if="!myRoomID && !friendRoomID"
+        v-if="!roomID"
         class="mt-2"
       >
         <BaseButton
@@ -54,9 +54,9 @@
           </icon-spinner>
           <h2 class="heading text-xl">
             {{
-              myRoomID ?
-              'Waiting for someone to enter your room...' :
-              "Joining your friend's room..."
+              joinSuccess ?
+              "Joining your friend's room..." :
+              'Waiting for someone to enter your room...'
             }}
           </h2>
         </div>
@@ -75,17 +75,16 @@ import { accessToken } from '../store/auth';
 const useSpotifyID = () => {
   const spotifyID = ref('');
   getUserInfo().then((user) => (spotifyID.value = user.id));
-  return spotifyID;
+  return { spotifyID };
 };
 
-const useRoomCreate = (spotifyID: Ref<string>) => {
-  const myRoomID = ref<number>();
+const useCreate = (spotifyID: Ref<string>, myRoomID: Ref<number>) => {
   watch(spotifyID, (value) =>
     getRoomID({ user_id: value }).then((result) => {
       if (result.matching_id) {
         myRoomID.value = result.matching_id;
       } else {
-        myRoomID.value = undefined;
+        myRoomID.value = 0;
       }
     }),
   );
@@ -100,19 +99,15 @@ const useRoomCreate = (spotifyID: Ref<string>) => {
     }
     myRoomID.value = result.matching_id;
   };
-  return {
-    create,
-    myRoomID,
-  };
+  return { create };
 };
 
-const useRoomInput = (spotifyID: Ref<string>) => {
+const useRoomInput = (spotifyID: Ref<string>, roomID: Ref<number>) => {
   const roomInput = ref<number>();
-  const friendRoomID = ref<number>();
-  const joinSuccess = ref<boolean>();
+  const joinSuccess = ref<boolean | null>(null);
 
   const join = async () => {
-    joinSuccess.value = undefined;
+    joinSuccess.value = null;
     if (!roomInput.value) {
       return;
     }
@@ -128,31 +123,28 @@ const useRoomInput = (spotifyID: Ref<string>) => {
         return;
       }
       joinSuccess.value = true;
-      friendRoomID.value = id;
+      roomID.value = id;
     });
   };
 
   return {
     roomInput,
     join,
-    friendRoomID,
     joinSuccess,
   };
 };
 
 export default defineComponent(function Matcher() {
-  const spotifyID = useSpotifyID();
-  const { create, myRoomID } = useRoomCreate(spotifyID);
-  const { roomInput, join, friendRoomID, joinSuccess } = useRoomInput(
-    spotifyID,
-  );
+  const { spotifyID } = useSpotifyID();
+  const roomID = ref(0);
+  const { create } = useCreate(spotifyID, roomID);
+  const { roomInput, join, joinSuccess } = useRoomInput(spotifyID, roomID);
 
   return {
     create,
-    myRoomID,
+    roomID,
     roomInput,
     join,
-    friendRoomID,
     joinSuccess,
   };
 });
