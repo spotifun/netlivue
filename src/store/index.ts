@@ -4,7 +4,11 @@ export const createStore = <T>(key: string) => {
   const state = ref<T>();
   const stored = localStorage.getItem(key);
   if (stored) {
-    state.value = JSON.parse(stored) as T;
+    try {
+      state.value = JSON.parse(stored) as T;
+    } catch (err) {
+      localStorage.removeItem(key);
+    }
   }
   const setState = (val: T) => {
     state.value = val;
