@@ -30,6 +30,6 @@ export const getRoomID = async (data: MatchingIDRequest) =>
   (await matcher.get('matching_id', { params: data }))
     .data as MatchingIDResponse;
 
-export const getRecommendation = async (data: RecommendationRequest) =>
+export const getSeeds = async (data: RecommendationRequest) =>
   (await matcher.get('recommendation', { params: data }))
     .data as RecommendationResponse;
