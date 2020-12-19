@@ -1,11 +1,11 @@
-enum MatchStatus {
+export enum MatchStatus {
   no_match,
   too_few,
   ok,
   too_much,
 }
 
-enum ResponseStatus {
+export enum ResponseStatus {
   ok,
   error,
 }
