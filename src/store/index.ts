@@ -1,6 +1,6 @@
 import { readonly, ref } from 'vue';
 
-export const createStore = <T>(key: string) => {
+export const createPersistedStore = <T>(key: string) => {
   const state = ref<T>();
   const stored = localStorage.getItem(key);
   if (stored) {
