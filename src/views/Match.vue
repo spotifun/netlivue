@@ -1,5 +1,5 @@
 <template>
-  <BaseContainer>
+  <BaseContainer class="my-32">
     <Matcher />
   </BaseContainer>
 </template>
