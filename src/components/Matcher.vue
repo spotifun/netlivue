@@ -3,22 +3,24 @@
     <div class="text-center">
       <div>
         <h2 class="text-3xl heading">
-          <template v-if="!roomID">You haven't entered a matching
-            room.</template>
-          <template v-else>Your room ID:
+          <template v-if="!myRoomID">
+            You haven't entered a matching room.
+          </template>
+          <template v-else>
+            Your room ID:
             <span class="text-green-400">
-              {{ roomID }}
+              {{ myRoomID }}
             </span>
           </template>
         </h2>
       </div>
       <div
-        v-if="!roomID"
+        v-if="!myRoomID"
         class="mt-2"
       >
         <BaseButton
           class="text-xl"
-          @click="createMyRoom(spotifyID)"
+          @click="create()"
         >
           Create a new matching room
         </BaseButton>
@@ -50,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, ref } from 'vue';
+import { defineComponent, ref, Ref, watch } from 'vue';
 import { createRoom, getRoomID } from '../services/funix/matcher';
 import { getUserInfo } from '../services/spotify/api';
 import { accessToken } from '../store/auth';
@@ -61,38 +63,41 @@ const useSpotifyID = () => {
   return spotifyID;
 };
 
-const useRoomID = (spotifyID: string) => {
-  const roomID = ref(0);
-  getRoomID({ user_id: spotifyID }).then((result) => {
-    if (result.matching_id) {
-      roomID.value = result.matching_id;
-    } else {
-      roomID.value = 0;
-    }
-  });
-  return roomID;
-};
+const useRoomCreate = (spotifyID: Ref<string>) => {
+  const myRoomID = ref<number>();
+  watch(spotifyID, (value) =>
+    getRoomID({ user_id: value }).then((result) => {
+      if (result.matching_id) {
+        myRoomID.value = result.matching_id;
+      } else {
+        myRoomID.value = undefined;
+      }
+    }),
+  );
 
-const _createMyRoom = async (spotifyID: string, roomID: Ref<number>) => {
-  const result = await createRoom({
-    user_id: spotifyID,
-    access_token: accessToken.value!.access_token!,
-  });
-  if (!result.matching_id) {
-    return;
-  }
-  roomID.value = result.matching_id;
+  const create = async () => {
+    const result = await createRoom({
+      user_id: spotifyID.value!,
+      access_token: accessToken.value!.access_token!,
+    });
+    if (!result.matching_id) {
+      return;
+    }
+    myRoomID.value = result.matching_id;
+  };
+  return {
+    create,
+    myRoomID,
+  };
 };
 
 export default defineComponent(function Matcher() {
   const spotifyID = useSpotifyID();
-  const roomID = useRoomID(spotifyID.value);
-  const createMyRoom = (spotifyID: string) => _createMyRoom(spotifyID, roomID);
+  const { create, myRoomID } = useRoomCreate(spotifyID);
 
   return {
-    createMyRoom,
-    roomID,
-    spotifyID,
+    create,
+    myRoomID,
   };
 });
 </script>
