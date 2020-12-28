@@ -1,5 +1,5 @@
 <template>
-  <BaseCard>
+  <BaseCard class="xs:p-0 xs:shadow-none">
     <h2 class="font-bold text-5xl text-center p-4 my-4">{{ title }}</h2>
     <ul class="text-left">
       <li
@@ -9,23 +9,28 @@
         <a
           :href="track.external_urls && track.external_urls.spotify"
           class="bg-gray-500 bg-opacity-10 hover:bg-opacity-20 focus:bg-opacity-20
-            flex px-6 py-4 rounded-xl my-2 items-center justify-between"
+            flex ph:flex-col px-6 py-4 rounded-xl my-2 items-center justify-between shadow-md"
         >
-          <div class="flex items-center">
+          <div class="flex ph:flex-col ph:text-center items-center">
             <img
               v-if="imageURL(track.album.images)"
               :src="imageURL(track.album.images)"
               :alt="track.album.name"
             >
-            <div class="ml-4">
-              <h3 class="font-bold text-xl">{{ track.name }}</h3>
+            <div class="ml-4 ph:mt-4 ph:mb-2 ph:ml-0">
+              <h3 class="font-bold">
+                {{ track.name }}</h3>
               <p>{{ artists[track.id] }}</p>
+              <span
+                v-if="track.explicit"
+                class="py-1 px-2 border-2 border-gray-500 rounded-md mt-2 inline-block text-xs md:hidden"
+              >EXPLICIT</span>
             </div>
           </div>
           <div>
             <span
               v-if="track.explicit"
-              class="p-2 border-2 border-gray-500 rounded-md mx-4 text-sm"
+              class="py-1 px-2 border-2 border-gray-500 rounded-md mx-4 text-xs xs:hidden"
             >EXPLICIT</span>
             <span>
               {{ millisToMinutesSeconds(track.duration_ms) }}
