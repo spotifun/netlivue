@@ -25,6 +25,12 @@
                 v-if="track.explicit"
                 class="py-1 px-2 border-2 border-gray-500 rounded-md mt-2 inline-block text-xs md:hidden"
               >EXPLICIT</span>
+              <audio
+                v-if="track.preview_url"
+                controls
+                :src="track.preview_url"
+                class="h-8 w-64 mt-2 hidden md:block"
+              ></audio>
             </div>
           </div>
           <div>
