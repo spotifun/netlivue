@@ -54,6 +54,7 @@ export interface MatchingIDResponse {
   errors?: Array<Record<string, any>>;
   matching_id?: number;
   status: ResponseStatus;
+  is_owner?: boolean;
 }
 
 export interface RecommendationSeeds {

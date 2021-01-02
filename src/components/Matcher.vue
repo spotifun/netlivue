@@ -136,9 +136,12 @@ export default defineComponent({
     // Get ID from Spotify and check if there's an active room.
     getUserInfo().then((user) => {
       spotifyID.value = user.id;
-      getRoomID({ user_id: user.id }).then(
-        (result) => (roomID.value = result.matching_id || 0),
-      );
+      getRoomID({ user_id: user.id }).then((result) => {
+        roomID.value = result.matching_id || 0;
+        if (result.is_owner === false) {
+          joinSuccess.value = true;
+        }
+      });
     });
 
     // Create room button handler.
