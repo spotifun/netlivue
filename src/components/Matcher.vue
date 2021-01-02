@@ -15,12 +15,9 @@
           </template>
         </h2>
         <h3
-          v-if="roomTimer"
+          v-if="roomTimer && !seeds"
           class="text-xl"
-        >
-          Room will close in <span class="font-bold">{{ roomTimer }}</span>
-          seconds.
-        </h3>
+        >Room will close in {{ roomTimer }} seconds.</h3>
       </div>
       <div
         v-if="!roomID && joinSuccess !== null && !recommendations"
@@ -81,13 +78,24 @@
           />
         </div>
       </div>
-      <BaseButton
-        v-if="recommendations"
-        class="text-xl mt-8"
-        @click="recommendations = null; roomID = 0; joinSuccess = undefined"
-      >
-        Clear
-      </BaseButton>
+      <div class="mt-4">
+        <h3
+          v-if="roomTimer && recommendations"
+          class="text-md"
+        >
+          <p class="mt-8">Don't like them?</p>
+          You still have
+          <strong>{{ roomTimer }}</strong> seconds to regenerate
+          the results.
+        </h3>
+        <BaseButton
+          v-if="recommendations && seeds"
+          class="text-xl mt-4"
+          @click="roomTimer ? generateRecommendations() : reset()"
+        >
+          {{ roomTimer ? 'Regenerate' : 'Reset' }}
+        </BaseButton>
+      </div>
     </div>
   </BaseCard>
 </template>
@@ -240,6 +248,14 @@ export default defineComponent({
       _clearPolling();
     });
 
+    const reset = () => {
+      seeds.value = null;
+      recommendations.value = null;
+      roomID.value = 0;
+      roomInput.value = undefined;
+      joinSuccess.value = undefined;
+    };
+
     onBeforeUnmount(_clearPolling);
 
     return {
@@ -251,6 +267,8 @@ export default defineComponent({
       joinSuccess,
       seeds,
       recommendations,
+      generateRecommendations,
+      reset,
     };
   },
 });
