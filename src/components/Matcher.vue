@@ -17,7 +17,7 @@
         <h3
           v-if="roomTimer && !seeds"
           class="text-xl"
-        >Room will close in {{ roomTimer }} seconds.</h3>
+        >Room will close in <strong>{{ roomTimer }}</strong> seconds.</h3>
       </div>
       <div
         v-if="!roomID && joinSuccess !== null && !recommendations"
