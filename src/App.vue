@@ -4,11 +4,7 @@
     class="flex flex-col items-center font-sans antialiased"
     :class="{ dark }"
   >
-    <TheNavbar
-      :is-dark="dark"
-      :nav-links="navLinks"
-      @dark="dark = !dark"
-    />
+    <TheNavbar :nav-links="navLinks" />
     <div
       id="content"
       class="flex w-full min-h-screen items-center
@@ -22,24 +18,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent } from 'vue';
+import { dark } from './store/app';
 import TheNavbar from './components/TheNavbar.vue';
 import router from './router';
-
-const useDark = () => {
-  const dark = ref(false);
-
-  if (localStorage.dark) {
-    dark.value = localStorage.dark === 'true';
-  } else {
-    dark.value =
-      window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches;
-  }
-
-  watch(dark, (val) => (localStorage.dark = val));
-  return dark;
-};
 
 const useNavLinks = () => {
   return computed(() =>
@@ -57,7 +39,6 @@ export default defineComponent({
     TheNavbar,
   },
   setup() {
-    const dark = useDark();
     const navLinks = useNavLinks();
     return {
       dark,

@@ -17,10 +17,10 @@
           class="focus:outline-none
           focus:text-blue-600 hover:text-blue-600
           dark:focus:text-blue-100 dark:hover:text-blue-100"
-          @click="$emit('dark')"
+          @click="setDark(!dark)"
         >
           <icon-base class="fill-current w-6 h-6">
-            <icon-moon v-if="isDark" />
+            <icon-moon v-if="dark" />
             <icon-sun v-else />
           </icon-base>
         </button>
@@ -62,6 +62,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 import { RouteRecordRaw } from 'vue-router';
+import { dark, setDark } from '../store/app';
 
 export default defineComponent({
   name: 'TheNavbar',
@@ -70,14 +71,14 @@ export default defineComponent({
       type: Array as PropType<RouteRecordRaw[]>,
       default: () => [{ name: 'Home', path: '/' }],
     },
-    isDark: Boolean,
   },
-  emits: ['dark'],
   setup() {
     const isOpen = ref(false);
     const toggleNavbar = () => (isOpen.value = !isOpen.value);
 
     return {
+      dark,
+      setDark,
       isOpen,
       toggleNavbar,
     };
