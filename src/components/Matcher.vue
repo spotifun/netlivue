@@ -3,7 +3,9 @@
     <div class="text-center">
       <div>
         <h2 class="text-3xl heading">
-          <template v-if="!roomID && joinSuccess === undefined">
+          <template
+            v-if="!roomID && joinSuccess === undefined && !recommendations"
+          >
             You haven't entered a matching room.
           </template>
           <template v-else>Your {{ joinSuccess ? "friend's" : '' }} room ID:
@@ -12,9 +14,16 @@
             </span>
           </template>
         </h2>
+        <h3
+          v-if="roomTimer"
+          class="text-xl"
+        >
+          Room will close in <span class="font-bold">{{ roomTimer }}</span>
+          seconds.
+        </h3>
       </div>
       <div
-        v-if="!roomID && joinSuccess === undefined"
+        v-if="!roomID && joinSuccess === undefined && !recommendations"
         class="mt-2"
       >
         <BaseButton
@@ -72,6 +81,13 @@
           />
         </div>
       </div>
+      <BaseButton
+        v-if="recommendations"
+        class="text-xl mt-8"
+        @click="recommendations = null; roomID = 0; joinSuccess = undefined"
+      >
+        Clear
+      </BaseButton>
     </div>
   </BaseCard>
 </template>
@@ -100,17 +116,21 @@ const useSpotifyID = () => {
   return { spotifyID };
 };
 
-const useCreate = (spotifyID: Ref<string>, myRoomID: Ref<number>) => {
+const useRoomID = (spotifyID: Ref<string>) => {
+  const roomID = ref(0);
   watch(spotifyID, (value) =>
     getRoomID({ user_id: value }).then((result) => {
       if (result.matching_id) {
-        myRoomID.value = result.matching_id;
+        roomID.value = result.matching_id;
       } else {
-        myRoomID.value = 0;
+        roomID.value = 0;
       }
     }),
   );
+  return { roomID };
+};
 
+const useCreate = (spotifyID: Ref<string>, roomID: Ref<number>) => {
   const create = async () => {
     const result = await createRoom({
       user_id: spotifyID.value!,
@@ -119,7 +139,7 @@ const useCreate = (spotifyID: Ref<string>, myRoomID: Ref<number>) => {
     if (!result.matching_id) {
       return;
     }
-    myRoomID.value = result.matching_id;
+    roomID.value = result.matching_id;
   };
   return { create };
 };
@@ -160,11 +180,12 @@ const _watchRoom = (
   spotifyID: Ref<string>,
   roomID: Ref<number>,
   seeds: Ref<FunixSeeds | null>,
+  roomTimer: Ref<number>,
 ) => {
   getRoomStatus({ matching_id: roomID.value }).then((data) => {
     switch (data.status) {
       case MatchStatus.too_few:
-        return;
+        break;
       case MatchStatus.no_match:
         roomID.value = 0;
         break;
@@ -174,7 +195,19 @@ const _watchRoom = (
         });
         break;
     }
+    if (data.expires_at && !roomTimer.value) {
+      _setTimer(data.expires_at, roomTimer);
+    }
   });
+};
+
+const _setTimer = (expiresAt: string, roomTimer: Ref<number>) => {
+  const expiry = new Date(expiresAt);
+  const now = new Date();
+  const diff = Math.floor((expiry.getTime() - now.getTime()) / 1000);
+  if (diff > 0) {
+    roomTimer.value = diff;
+  }
 };
 
 const _clearPolling = (polling: Ref<ReturnType<typeof setInterval> | null>) => {
@@ -186,6 +219,7 @@ const usePolling = (
   spotifyID: Ref<string>,
   roomID: Ref<number>,
   seeds: Ref<FunixSeeds | null>,
+  roomTimer: Ref<number>,
 ) => {
   const polling: Ref<ReturnType<typeof setInterval> | null> = ref(null);
   watch(roomID, (id) => {
@@ -193,8 +227,9 @@ const usePolling = (
       _clearPolling(polling);
       return;
     }
+    _watchRoom(spotifyID, roomID, seeds, roomTimer);
     polling.value = setInterval(
-      () => _watchRoom(spotifyID, roomID, seeds),
+      () => _watchRoom(spotifyID, roomID, seeds, roomTimer),
       3000,
     );
   });
@@ -230,19 +265,29 @@ export default defineComponent({
     TrackList,
   },
   setup() {
-    const roomID = ref(0);
+    const roomTimer = ref(0);
     const seeds = ref<FunixSeeds | null>(null);
     const { spotifyID } = useSpotifyID();
+    const { roomID } = useRoomID(spotifyID);
     const { create } = useCreate(spotifyID, roomID);
     const { roomInput, join, joinSuccess } = useRoomInput(spotifyID, roomID);
-    const { polling } = usePolling(spotifyID, roomID, seeds);
+    const { polling } = usePolling(spotifyID, roomID, seeds, roomTimer);
     const { recommendations } = useRecommendations(seeds);
+
+    watch(roomTimer, (val) => {
+      if (!val || roomTimer.value <= 0) {
+        roomTimer.value = 0;
+        return;
+      }
+      setTimeout(() => roomTimer.value--, 1000);
+    });
 
     onBeforeUnmount(() => _clearPolling(polling));
 
     return {
       create,
       roomID,
+      roomTimer,
       roomInput,
       join,
       joinSuccess,

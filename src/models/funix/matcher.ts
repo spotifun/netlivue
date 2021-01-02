@@ -45,6 +45,7 @@ export interface StatusResponse {
   errors?: Array<Record<string, any>>;
   matching_id?: number;
   status: MatchStatus | ResponseStatus;
+  expires_at?: string;
 }
 
 export interface MatchingIDRequest extends GenericRequest {}
