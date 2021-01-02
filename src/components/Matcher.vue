@@ -110,169 +110,126 @@ import { getRecommendations, getUserInfo } from '../services/spotify/api';
 import { accessToken } from '../store/auth';
 import TrackList from './TrackList.vue';
 
-const useSpotifyID = () => {
-  const spotifyID = ref('');
-  getUserInfo().then((user) => (spotifyID.value = user.id));
-  return { spotifyID };
-};
-
-const useRoomID = (spotifyID: Ref<string>) => {
-  const roomID = ref(0);
-  watch(spotifyID, (value) =>
-    getRoomID({ user_id: value }).then((result) => {
-      if (result.matching_id) {
-        roomID.value = result.matching_id;
-      } else {
-        roomID.value = 0;
-      }
-    }),
-  );
-  return { roomID };
-};
-
-const useCreate = (spotifyID: Ref<string>, roomID: Ref<number>) => {
-  const create = async () => {
-    const result = await createRoom({
-      user_id: spotifyID.value!,
-      access_token: accessToken.value!.access_token!,
-    });
-    if (!result.matching_id) {
-      return;
-    }
-    roomID.value = result.matching_id;
-  };
-  return { create };
-};
-
-const useRoomInput = (spotifyID: Ref<string>, roomID: Ref<number>) => {
-  const roomInput = ref<number>();
-  const joinSuccess = ref<boolean | null | undefined>();
-
-  const join = async () => {
-    joinSuccess.value = null;
-    if (!roomInput.value) {
-      return;
-    }
-
-    const id = roomInput.value;
-    joinRoom({
-      matching_id: id,
-      user_id: spotifyID.value!,
-      access_token: accessToken.value?.access_token!,
-    }).then((response) => {
-      if (response.status !== MatchStatus.ok) {
-        joinSuccess.value = false;
-        return;
-      }
-      joinSuccess.value = true;
-      roomID.value = id;
-    });
-  };
-
-  return {
-    roomInput,
-    join,
-    joinSuccess,
-  };
-};
-
-const _watchRoom = (
-  spotifyID: Ref<string>,
-  roomID: Ref<number>,
-  seeds: Ref<FunixSeeds | null>,
-  roomTimer: Ref<number>,
-) => {
-  getRoomStatus({ matching_id: roomID.value }).then((data) => {
-    switch (data.status) {
-      case MatchStatus.too_few:
-        break;
-      case MatchStatus.no_match:
-        roomID.value = 0;
-        break;
-      case MatchStatus.ok:
-        getSeeds({ user_id: spotifyID.value }).then((data) => {
-          seeds.value = data.seeds;
-        });
-        break;
-    }
-    if (data.expires_at && !roomTimer.value) {
-      _setTimer(data.expires_at, roomTimer);
-    }
-  });
-};
-
-const _setTimer = (expiresAt: string, roomTimer: Ref<number>) => {
-  const expiry = new Date(expiresAt);
-  const now = new Date();
-  const diff = Math.floor((expiry.getTime() - now.getTime()) / 1000);
-  if (diff > 0) {
-    roomTimer.value = diff;
-  }
-};
-
-const _clearPolling = (polling: Ref<ReturnType<typeof setInterval> | null>) => {
-  clearInterval(polling.value!);
-  polling.value = null;
-};
-
-const usePolling = (
-  spotifyID: Ref<string>,
-  roomID: Ref<number>,
-  seeds: Ref<FunixSeeds | null>,
-  roomTimer: Ref<number>,
-) => {
-  const polling: Ref<ReturnType<typeof setInterval> | null> = ref(null);
-  watch(roomID, (id) => {
-    if (!id) {
-      _clearPolling(polling);
-      return;
-    }
-    _watchRoom(spotifyID, roomID, seeds, roomTimer);
-    polling.value = setInterval(
-      () => _watchRoom(spotifyID, roomID, seeds, roomTimer),
-      3000,
-    );
-  });
-  watch(seeds, (value) => {
-    if (!value) {
-      _clearPolling(polling);
-    }
-  });
-  return { polling };
-};
-
-const useRecommendations = (seeds: Ref<FunixSeeds | null>) => {
-  const recommendations = ref<RecommendationResponse | null>(null);
-  watch(seeds, (value) => {
-    if (!value) {
-      return;
-    }
-    getRecommendations({
-      seed_artists: value.seed_artists,
-      seed_tracks: value.seed_tracks,
-      seed_genres: value.seed_genres || [],
-    }).then((results) => {
-      recommendations.value = results;
-      seeds.value = null;
-    });
-  });
-  return { recommendations };
-};
-
 export default defineComponent({
   name: 'Matcher',
   components: {
     TrackList,
   },
   setup() {
+    const spotifyID = ref('');
+    getUserInfo().then((user) => (spotifyID.value = user.id));
+
+    const roomID = ref(0);
+    watch(spotifyID, (value) =>
+      getRoomID({ user_id: value }).then((result) => {
+        if (result.matching_id) {
+          roomID.value = result.matching_id;
+        } else {
+          roomID.value = 0;
+        }
+      }),
+    );
+    const create = async () => {
+      const result = await createRoom({
+        user_id: spotifyID.value!,
+        access_token: accessToken.value!.access_token!,
+      });
+      if (!result.matching_id) {
+        return;
+      }
+      roomID.value = result.matching_id;
+    };
+
+    const roomInput = ref<number>();
+    const joinSuccess = ref<boolean | null | undefined>();
+
+    const join = async () => {
+      joinSuccess.value = null;
+      if (!roomInput.value) {
+        return;
+      }
+
+      const id = roomInput.value;
+      joinRoom({
+        matching_id: id,
+        user_id: spotifyID.value!,
+        access_token: accessToken.value?.access_token!,
+      }).then((response) => {
+        if (response.status !== MatchStatus.ok) {
+          joinSuccess.value = false;
+          return;
+        }
+        joinSuccess.value = true;
+        roomID.value = id;
+      });
+    };
+
     const roomTimer = ref(0);
     const seeds = ref<FunixSeeds | null>(null);
-    const { spotifyID } = useSpotifyID();
-    const { roomID } = useRoomID(spotifyID);
-    const { create } = useCreate(spotifyID, roomID);
-    const { roomInput, join, joinSuccess } = useRoomInput(spotifyID, roomID);
-    const { polling } = usePolling(spotifyID, roomID, seeds, roomTimer);
-    const { recommendations } = useRecommendations(seeds);
+
+    const _watchRoom = () => {
+      getRoomStatus({ matching_id: roomID.value }).then((data) => {
+        switch (data.status) {
+          case MatchStatus.too_few:
+            break;
+          case MatchStatus.no_match:
+            roomID.value = 0;
+            break;
+          case MatchStatus.ok:
+            getSeeds({ user_id: spotifyID.value }).then((data) => {
+              seeds.value = data.seeds;
+            });
+            break;
+        }
+        if (data.expires_at && !roomTimer.value) {
+          _setTimer(data.expires_at, roomTimer);
+        }
+      });
+    };
+
+    const _setTimer = (expiresAt: string, roomTimer: Ref<number>) => {
+      const expiry = new Date(expiresAt);
+      const now = new Date();
+      const diff = Math.floor((expiry.getTime() - now.getTime()) / 1000);
+      if (diff > 0) {
+        roomTimer.value = diff;
+      }
+    };
+
+    const _clearPolling = () => {
+      clearInterval(polling.value!);
+      polling.value = null;
+    };
+
+    const polling: Ref<ReturnType<typeof setInterval> | null> = ref(null);
+    watch(roomID, (id) => {
+      if (!id) {
+        _clearPolling();
+        return;
+      }
+      _watchRoom();
+      polling.value = setInterval(_watchRoom, 3000);
+    });
+    watch(seeds, (value) => {
+      if (!value) {
+        _clearPolling();
+      }
+    });
+
+    const recommendations = ref<RecommendationResponse | null>(null);
+    watch(seeds, (value) => {
+      if (!value) {
+        return;
+      }
+      getRecommendations({
+        seed_artists: value.seed_artists,
+        seed_tracks: value.seed_tracks,
+        seed_genres: value.seed_genres || [],
+      }).then((results) => {
+        recommendations.value = results;
+        seeds.value = null;
+      });
+    });
 
     watch(roomTimer, (val) => {
       if (!val || roomTimer.value <= 0) {
@@ -282,7 +239,7 @@ export default defineComponent({
       setTimeout(() => roomTimer.value--, 1000);
     });
 
-    onBeforeUnmount(() => _clearPolling(polling));
+    onBeforeUnmount(_clearPolling);
 
     return {
       create,
