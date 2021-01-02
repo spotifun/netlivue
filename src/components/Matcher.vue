@@ -118,148 +118,155 @@ import { getRecommendations, getUserInfo } from '../services/spotify/api';
 import { accessToken } from '../store/auth';
 import TrackList from './TrackList.vue';
 
+const roomID = ref(0);
+const roomTimer = ref(0);
+const roomInput = ref<number>();
+const joinSuccess = ref<boolean | null | undefined>();
+const seeds = ref<FunixSeeds | null>(null);
+const recommendations = ref<RecommendationResponse | null>(null);
+let spotifyID: string;
+let polling: ReturnType<typeof setInterval>;
+
+// Get ID from Spotify and check if there's an active room.
+const initializeRoom = () => {
+  getUserInfo().then((user) => {
+    spotifyID = user.id;
+    getRoomID({ user_id: user.id }).then((result) => {
+      roomID.value = result.matching_id || 0;
+      if (result.is_owner === false) {
+        joinSuccess.value = true;
+      }
+    });
+  });
+};
+
+// Create room button handler.
+const create = async () => {
+  const result = await createRoom({
+    user_id: spotifyID,
+    access_token: accessToken.value!.access_token!,
+  });
+  if (!result.matching_id) {
+    return;
+  }
+  roomID.value = result.matching_id;
+};
+
+// Join room button handler.
+const join = async () => {
+  if (!roomInput.value) {
+    return;
+  }
+  joinSuccess.value = null;
+
+  const id = roomInput.value;
+  joinRoom({
+    matching_id: id,
+    user_id: spotifyID,
+    access_token: accessToken.value?.access_token!,
+  }).then((response) => {
+    if (response.status !== MatchStatus.ok) {
+      joinSuccess.value = false;
+      return;
+    }
+    joinSuccess.value = true;
+    roomID.value = id;
+  });
+};
+
+const _setTimer = (expiresAt: string) => {
+  const expiry = new Date(expiresAt);
+  const now = new Date();
+  const diff = Math.floor((expiry.getTime() - now.getTime()) / 1000);
+  if (diff > 0) {
+    roomTimer.value = diff;
+  }
+};
+
+// Create countdown effect.
+const useRoomTimer = () => {
+  watch(roomTimer, (val) => {
+    if (!val || roomTimer.value <= 0) {
+      roomTimer.value = 0;
+      return;
+    }
+    setTimeout(() => roomTimer.value--, 1000);
+  });
+};
+
+const _watchRoom = () => {
+  getRoomStatus({ matching_id: roomID.value }).then((data) => {
+    switch (data.status) {
+      case MatchStatus.too_few:
+        break;
+      case MatchStatus.no_match:
+        roomID.value = 0;
+        break;
+      case MatchStatus.ok:
+        getSeeds({ user_id: spotifyID }).then((data) => {
+          seeds.value = data.seeds;
+        });
+        break;
+    }
+    if (data.expires_at && !roomTimer.value) {
+      _setTimer(data.expires_at);
+    }
+  });
+};
+
+// Start/stop polling based on room ID availability.
+const useRoomWatcher = () => {
+  watch(roomID, (id) => {
+    if (!id) {
+      clearInterval(polling);
+      return;
+    }
+    _watchRoom();
+    polling = setInterval(_watchRoom, 3000);
+  });
+};
+
+// Create recommendations based on current seeds.
+const generateRecommendations = () => {
+  getRecommendations({
+    seed_artists: seeds.value!.seed_artists,
+    seed_tracks: seeds.value!.seed_tracks,
+    seed_genres: seeds.value!.seed_genres || [],
+  }).then((results) => {
+    recommendations.value = results;
+  });
+};
+
+// Once the seed is retrieved, generate recommendations and stop polling.
+const useSeedWatcher = () => {
+  watch(seeds, (value) => {
+    if (!value) {
+      return;
+    }
+    generateRecommendations();
+    clearInterval(polling);
+  });
+};
+
+const reset = () => {
+  seeds.value = null;
+  recommendations.value = null;
+  roomID.value = 0;
+  roomInput.value = undefined;
+  joinSuccess.value = undefined;
+};
+
 export default defineComponent({
   name: 'Matcher',
   components: {
     TrackList,
   },
   setup() {
-    const spotifyID = ref('');
-    const roomID = ref(0);
-    const roomTimer = ref(0);
-    const roomInput = ref<number>();
-    const joinSuccess = ref<boolean | null | undefined>();
-    const seeds = ref<FunixSeeds | null>(null);
-    const polling: Ref<ReturnType<typeof setInterval> | null> = ref(null);
-    const recommendations = ref<RecommendationResponse | null>(null);
-
-    // Get ID from Spotify and check if there's an active room.
-    getUserInfo().then((user) => {
-      spotifyID.value = user.id;
-      getRoomID({ user_id: user.id }).then((result) => {
-        roomID.value = result.matching_id || 0;
-        if (result.is_owner === false) {
-          joinSuccess.value = true;
-        }
-      });
-    });
-
-    // Create room button handler.
-    const create = async () => {
-      const result = await createRoom({
-        user_id: spotifyID.value!,
-        access_token: accessToken.value!.access_token!,
-      });
-      if (!result.matching_id) {
-        return;
-      }
-      roomID.value = result.matching_id;
-    };
-
-    // Join room button handler.
-    const join = async () => {
-      if (!roomInput.value) {
-        return;
-      }
-      joinSuccess.value = null;
-
-      const id = roomInput.value;
-      joinRoom({
-        matching_id: id,
-        user_id: spotifyID.value!,
-        access_token: accessToken.value?.access_token!,
-      }).then((response) => {
-        if (response.status !== MatchStatus.ok) {
-          joinSuccess.value = false;
-          return;
-        }
-        joinSuccess.value = true;
-        roomID.value = id;
-      });
-    };
-
-    const _setTimer = (expiresAt: string) => {
-      const expiry = new Date(expiresAt);
-      const now = new Date();
-      const diff = Math.floor((expiry.getTime() - now.getTime()) / 1000);
-      if (diff > 0) {
-        roomTimer.value = diff;
-      }
-    };
-
-    // Create countdown effect.
-    watch(roomTimer, (val) => {
-      if (!val || roomTimer.value <= 0) {
-        roomTimer.value = 0;
-        return;
-      }
-      setTimeout(() => roomTimer.value--, 1000);
-    });
-
-    const _watchRoom = () => {
-      getRoomStatus({ matching_id: roomID.value }).then((data) => {
-        switch (data.status) {
-          case MatchStatus.too_few:
-            break;
-          case MatchStatus.no_match:
-            roomID.value = 0;
-            break;
-          case MatchStatus.ok:
-            getSeeds({ user_id: spotifyID.value }).then((data) => {
-              seeds.value = data.seeds;
-            });
-            break;
-        }
-        if (data.expires_at && !roomTimer.value) {
-          _setTimer(data.expires_at);
-        }
-      });
-    };
-
-    const _clearPolling = () => {
-      clearInterval(polling.value!);
-      polling.value = null;
-    };
-
-    // Start/stop polling based on room ID availability.
-    watch(roomID, (id) => {
-      if (!id) {
-        _clearPolling();
-        return;
-      }
-      _watchRoom();
-      polling.value = setInterval(_watchRoom, 3000);
-    });
-
-    // Create recommendations based on current seeds.
-    const generateRecommendations = () => {
-      getRecommendations({
-        seed_artists: seeds.value!.seed_artists,
-        seed_tracks: seeds.value!.seed_tracks,
-        seed_genres: seeds.value!.seed_genres || [],
-      }).then((results) => {
-        recommendations.value = results;
-      });
-    };
-
-    // Once the seed is retrieved, generate recommendations and stop polling.
-    watch(seeds, (value) => {
-      if (!value) {
-        return;
-      }
-      generateRecommendations();
-      _clearPolling();
-    });
-
-    const reset = () => {
-      seeds.value = null;
-      recommendations.value = null;
-      roomID.value = 0;
-      roomInput.value = undefined;
-      joinSuccess.value = undefined;
-    };
-
-    onBeforeUnmount(_clearPolling);
+    initializeRoom();
+    useRoomTimer();
+    useRoomWatcher();
+    useSeedWatcher();
+    onBeforeUnmount(() => clearInterval(polling));
 
     return {
       create,
