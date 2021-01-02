@@ -23,7 +23,7 @@
         </h3>
       </div>
       <div
-        v-if="!roomID && joinSuccess === undefined && !recommendations"
+        v-if="!roomID && joinSuccess !== null && !recommendations"
         class="mt-2"
       >
         <BaseButton
@@ -117,18 +117,23 @@ export default defineComponent({
   },
   setup() {
     const spotifyID = ref('');
-    getUserInfo().then((user) => (spotifyID.value = user.id));
-
     const roomID = ref(0);
-    watch(spotifyID, (value) =>
-      getRoomID({ user_id: value }).then((result) => {
-        if (result.matching_id) {
-          roomID.value = result.matching_id;
-        } else {
-          roomID.value = 0;
-        }
-      }),
-    );
+    const roomTimer = ref(0);
+    const roomInput = ref<number>();
+    const joinSuccess = ref<boolean | null | undefined>();
+    const seeds = ref<FunixSeeds | null>(null);
+    const polling: Ref<ReturnType<typeof setInterval> | null> = ref(null);
+    const recommendations = ref<RecommendationResponse | null>(null);
+
+    // Get ID from Spotify and check if there's an active room.
+    getUserInfo().then((user) => {
+      spotifyID.value = user.id;
+      getRoomID({ user_id: user.id }).then(
+        (result) => (roomID.value = result.matching_id || 0),
+      );
+    });
+
+    // Create room button handler.
     const create = async () => {
       const result = await createRoom({
         user_id: spotifyID.value!,
@@ -140,14 +145,12 @@ export default defineComponent({
       roomID.value = result.matching_id;
     };
 
-    const roomInput = ref<number>();
-    const joinSuccess = ref<boolean | null | undefined>();
-
+    // Join room button handler.
     const join = async () => {
-      joinSuccess.value = null;
       if (!roomInput.value) {
         return;
       }
+      joinSuccess.value = null;
 
       const id = roomInput.value;
       joinRoom({
@@ -164,8 +167,23 @@ export default defineComponent({
       });
     };
 
-    const roomTimer = ref(0);
-    const seeds = ref<FunixSeeds | null>(null);
+    const _setTimer = (expiresAt: string) => {
+      const expiry = new Date(expiresAt);
+      const now = new Date();
+      const diff = Math.floor((expiry.getTime() - now.getTime()) / 1000);
+      if (diff > 0) {
+        roomTimer.value = diff;
+      }
+    };
+
+    // Create countdown effect.
+    watch(roomTimer, (val) => {
+      if (!val || roomTimer.value <= 0) {
+        roomTimer.value = 0;
+        return;
+      }
+      setTimeout(() => roomTimer.value--, 1000);
+    });
 
     const _watchRoom = () => {
       getRoomStatus({ matching_id: roomID.value }).then((data) => {
@@ -182,18 +200,9 @@ export default defineComponent({
             break;
         }
         if (data.expires_at && !roomTimer.value) {
-          _setTimer(data.expires_at, roomTimer);
+          _setTimer(data.expires_at);
         }
       });
-    };
-
-    const _setTimer = (expiresAt: string, roomTimer: Ref<number>) => {
-      const expiry = new Date(expiresAt);
-      const now = new Date();
-      const diff = Math.floor((expiry.getTime() - now.getTime()) / 1000);
-      if (diff > 0) {
-        roomTimer.value = diff;
-      }
     };
 
     const _clearPolling = () => {
@@ -201,7 +210,7 @@ export default defineComponent({
       polling.value = null;
     };
 
-    const polling: Ref<ReturnType<typeof setInterval> | null> = ref(null);
+    // Start/stop polling based on room ID availability.
     watch(roomID, (id) => {
       if (!id) {
         _clearPolling();
@@ -210,33 +219,25 @@ export default defineComponent({
       _watchRoom();
       polling.value = setInterval(_watchRoom, 3000);
     });
-    watch(seeds, (value) => {
-      if (!value) {
-        _clearPolling();
-      }
-    });
 
-    const recommendations = ref<RecommendationResponse | null>(null);
-    watch(seeds, (value) => {
-      if (!value) {
-        return;
-      }
+    // Create recommendations based on current seeds.
+    const generateRecommendations = () => {
       getRecommendations({
-        seed_artists: value.seed_artists,
-        seed_tracks: value.seed_tracks,
-        seed_genres: value.seed_genres || [],
+        seed_artists: seeds.value!.seed_artists,
+        seed_tracks: seeds.value!.seed_tracks,
+        seed_genres: seeds.value!.seed_genres || [],
       }).then((results) => {
         recommendations.value = results;
-        seeds.value = null;
       });
-    });
+    };
 
-    watch(roomTimer, (val) => {
-      if (!val || roomTimer.value <= 0) {
-        roomTimer.value = 0;
+    // Once the seed is retrieved, generate recommendations and stop polling.
+    watch(seeds, (value) => {
+      if (!value) {
         return;
       }
-      setTimeout(() => roomTimer.value--, 1000);
+      generateRecommendations();
+      _clearPolling();
     });
 
     onBeforeUnmount(_clearPolling);
