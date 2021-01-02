@@ -1,7 +1,11 @@
-import { readonly, ref } from 'vue';
+import { readonly, Ref, ref } from 'vue';
 
-export const createPersistedStore = <T>(key: string) => {
-  const state = ref<T>();
+export const createDefinitePersistedStore = <T>(
+  key: string,
+  defaultValue: T,
+) => {
+  const state = ref(defaultValue) as Ref<T>;
+
   const stored = localStorage.getItem(key);
   if (stored) {
     try {
@@ -15,8 +19,11 @@ export const createPersistedStore = <T>(key: string) => {
     localStorage.setItem(key, JSON.stringify(val));
   };
   const deleteState = () => {
-    state.value = undefined;
+    state.value = defaultValue;
     delete localStorage[key];
   };
   return { state: readonly(state), setState, deleteState };
 };
+
+export const createPersistedStore = <T>(key: string) =>
+  createDefinitePersistedStore<T | undefined>(key, undefined);
